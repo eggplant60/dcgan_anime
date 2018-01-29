@@ -1,0 +1,57 @@
+11/19 1回目：やや成功
+64x64, 43000枚(LANCZOS)
+gen: alpha=0.0002, beta1=0.5
+dis: alpha=0.0002, beta1=0.5
+initail_simga=0.5, co_sigma=0.95
+
+11/19 3回目：失敗
+64x64, 100000枚(LANCZOS)
+gen: alpha=0.0004, beta1=0.5
+dis: alpha=0.00005, beta1=0.5
+initail_simga=0.2, co_sigma=0.95?
+
+11/20 1回目: 失敗 <= disが弱い
+initwを揃える
+64x64, 100000枚(LANCZOS)
+gen: alpha=0.0002, beta1=0.5
+dis: alpha=0.00005, beta1=0.5
+initail_simga=0.4, co_sigma=0.95
+
+11/20 2回目: 成功！
+initwを揃える wscale=0.02
+64x64, 100000枚(LANCZOS)
+gen: alpha=0.0002, beta1=0.5
+dis: alpha=0.0002, beta1=0.5
+initail_simga=0.2, co_sigma=0.9
+
+11/21 1回目：
+initwを揃える wscale=0.05
+64x64, 100000枚(ANTIALIAS)
+gen: alpha=0.0002, beta1=0.5
+dis: alpha=0.0002, beta1=0.5
+initail_simga=0.2, co_sigma=0.9
+
+11/21 2回目：まあまあ成功
+initwを揃える wscale=0.05
+96x96, 100000枚(ANTIALIAS)
+gen: alpha=0.0002, beta1=0.5
+dis: alpha=0.0002, beta1=0.5
+initail_simga=0.2, co_sigma=0.9
+
+11/23 1回目：成功
+initwを揃える wscale=0.02
+64x64, 2903枚(ANTIALIAS)
+batchsize = 50
+n_hidden = 64
+gen: alpha=0.0002, beta1=0.5
+dis: alpha=0.0002, beta1=0.5
+initail_simga=0.1, co_sigma=0.9
+
+1/24 1回目：
+initwを揃える wscale=0.02
+96x96, 2189枚(ANTIALIAS)
+batchsize = 50
+n_hidden = 64
+gen: alpha=0.0002, beta1=0.5
+dis: alpha=0.0002, beta1=0.5
+initail_simga=0.1, co_sigma=0.9
