@@ -51,6 +51,8 @@ class Generator(chainer.Chain):
         h = F.relu(self.bn1(self.dc1(h)))
         h = F.relu(self.bn2(self.dc2(h)))
         h = F.relu(self.bn3(self.dc3(h)))
+        # 最終層にはBN入れない
+        # https://elix-tech.github.io/ja/2017/02/06/gan.html
         x = F.tanh(self.dc4(h)) # [-1, 1]
         return x
 
@@ -75,6 +77,8 @@ class Discriminator(chainer.Chain):
         
     def __call__(self, x):
         h = add_noise(x,self.sigma)
+        # 入力層にはBN入れない
+        # https://elix-tech.github.io/ja/2017/02/06/gan.html
         h = F.leaky_relu(add_noise(self.c0(h),self.sigma)) # no bn because images from generator will katayotteru?
         h = F.leaky_relu(add_noise(self.bn1(self.c1(h)),self.sigma))
         h = F.leaky_relu(add_noise(self.bn2(self.c2(h)),self.sigma))
