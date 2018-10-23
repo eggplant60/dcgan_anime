@@ -149,9 +149,9 @@ def resize_data(paths, root='.', cashe_dir='/tmp/cashe'):
     
 def main():
     parser = argparse.ArgumentParser(description='Chainer example: DCGAN')
-    parser.add_argument('--batchsize', '-b', type=int, default=100, # default=50
+    parser.add_argument('--batchsize', '-b', type=int, default=50, # default=50
                         help='Number of images in each mini-batch')
-    parser.add_argument('--epoch', '-e', type=int, default=100, # defalt=500
+    parser.add_argument('--epoch', '-e', type=int, default=500, # defalt=500
                         help='Number of sweeps over the dataset to train')
     parser.add_argument('--gpu', '-g', type=int, default=0,
                         help='GPU ID (negative value indicates CPU)')
