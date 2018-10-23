@@ -1,3 +1,7 @@
 __pycache__
+.ipynb_checkpoints
+*.pyc
+
+train.txt
 cifar10
 result_*
