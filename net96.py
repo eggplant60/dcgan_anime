@@ -57,6 +57,18 @@ class Generator(chainer.Chain):
         return x
 
 
+class MyLayerNormalization(L.LayerNormalization):
+    def __init__(self, ch):
+        super(MyLayerNormalization, self).__init__()
+    
+    def __call__(self, x):
+        shape = x.shape
+        x = x.reshape((shape[0], -1)) # flatten
+        x = super().__call__(x)
+        x = x.reshape(shape)
+        return x
+
+    
 class Discriminator(chainer.Chain):
     def __init__(self, init_sigma=0.2, wscale=0.02):
         self.sigma = init_sigma
@@ -73,7 +85,9 @@ class Discriminator(chainer.Chain):
             self.bn1 = L.BatchNormalization(128)
             self.bn2 = L.BatchNormalization(256)
             self.bn3 = L.BatchNormalization(512)
-
+            # self.bn1 = MyLayerNormalization(None)
+            # self.bn2 = MyLayerNormalization(None)
+            # self.bn3 = MyLayerNormalization(None)
         
     def __call__(self, x):
         h = add_noise(x,self.sigma)
