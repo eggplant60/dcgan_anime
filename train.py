@@ -12,14 +12,13 @@ from chainer.training import extensions
 import cifar
 from updater import DCGANUpdater, WGANGPUpdater
 from visualize import out_generated_image
+from dataset import *
 
 #from chainer.datasets import TransformDataset
 #from chainercv.transforms.image.resize import resize
 
 from PIL import Image
 import numpy as np
-from chainer.dataset import dataset_mixin
-
 
 insize = 96
 
@@ -29,97 +28,6 @@ elif insize == 64:
     from net64 import Discriminator, Generator
 elif insize == 96:
     from net96 import Discriminator, Generator
-
-
-
-class PreprocessedDataset(dataset_mixin.DatasetMixin):
-
-    def __init__(self, paths, root='.', dtype=np.float32):
-        if isinstance(paths, six.string_types):
-            with open(paths) as paths_file:
-                paths = [path.strip() for path in paths_file]
-        self._paths = paths
-        self._root = root
-        self._dtype = dtype
-
-    def __len__(self):
-        return len(self._paths)
-
-    def get_example(self, i):
-        path = os.path.join(self._root, self._paths[i])
-        img = Image.open(path, 'r')
-
-        # # 以下は逐次処理だと間に合わないので前処理に移行
-        # 3. Random cropping
-        # ! PIL.Image.Image 形式なので以下の演算はエラー？
-        # -> img.crop()を使えばよい
-        #_, h, w = img.shape
-        #top = np.random.randint(0, h//3)
-        #left = np.random.randint(0, w//3)
-        #img = img[:, top:top+2*h//3, left:left+2*w//3]
-        
-        # 4. Resizing
-        # PILのresizeだとアンチエイリアスが使えない？
-        #img = img.resize((insize, insize), Image.LANCZOS)
-        #print(type(img)) # PIL.Image.Image
-
-        # 5. Converting format of chainer (np.ndarray, float32, CHW)
-        array = np.asarray(img, dtype=np.float32)
-        if array.ndim == 2:
-            img = image[:, :, np.newaxis] # image is greyscale
-        img = array.transpose(2, 0, 1)
-        
-        # 6. Nomilizing in [-1, 1]
-        img = (img - 128.0) / 128.0 
-    
-        # 7. Random horizontal flipping
-        if np.random.randint(2):
-            img = img[:,:,::-1]
-
-        return img
-
-    
-# メモリの有効活用のため、事前にリサイズを行っておく関数
-def resize_data(paths, root='.', cashe_dir='/tmp/cashe'):
-
-    if isinstance(paths, six.string_types):
-        with open(paths) as paths_file:
-            paths = [path.strip() for path in paths_file]
-
-    if not os.path.exists(cashe_dir):
-        os.mkdir(cashe_dir)
-
-    output_paths = []
-    for path in paths:
-        img_file = os.path.join(root, path)
-        #print(img_file)
-        
-        img_split = img_file.split('/')
-        output_dir = os.path.join(cashe_dir, img_split[-2])
-        output_file = os.path.join(output_dir, img_split[-1])
-        #print(output_file)
-        output_paths.append(output_file)
-
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-
-        if not os.path.exists(output_file):
-            img = Image.open(path, 'r')
-            # Crop center
-            if img.size[0] > img.size[1]:
-                sub = (img.size[0] - img.size[1]) // 2
-                img = img.crop((sub, 0, img.size[0]-1-sub, img.size[1]-1))
-                print(img.size)
-            elif img.size[0] < img.size[1]:
-                sub = (img.size[1] - img.size[0]) // 2
-                img = img.crop((0, sub, img.size[0]-1, img.size[1]-1-sub))
-                print(img.size)
-            # Resize
-            img = img.resize((insize, insize), Image.ANTIALIAS)
-            img.save(output_file)
-
-    return output_paths
-                    
         
     
 def main():
@@ -140,7 +48,7 @@ def main():
                         help='Number of hidden units (z)')
     parser.add_argument('--seed', type=int, default=0,
                         help='Random seed of z at visualization stage')
-    parser.add_argument('--snapshot_interval', type=int, default=1000, # defalt=1000
+    parser.add_argument('--snapshot_interval', type=int, default=100, # defalt=1000
                         help='Interval of snapshot')
     parser.add_argument('--display_interval', type=int, default=100,
                         help='Interval of displaying log to console')
@@ -187,14 +95,13 @@ def main():
         # Load the CIFAR10 dataset if args.dataset is not specified
         train, _ = cifar.get_cifar10(withlabel=False, scale=255.)
     else:
-        resized_paths = resize_data(paths=args.dataset)
-        train = PreprocessedDataset(paths=resized_paths, root='/')
-        print('{} contains {} image files'
-              .format(args.dataset, train.__len__()))
-
+        resized_paths = resize_data(args.dataset, insize+32)
+        train = PreprocessedDataset(resized_paths, crop_size=insize)
+    print('{} contains {} image files'.format(args.dataset, train.__len__()))
+              
     train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
 
-    Set up a trainer
+    # Set up a trainer
     updater = DCGANUpdater(
         models=(gen, dis),
         iterator=train_iter,
