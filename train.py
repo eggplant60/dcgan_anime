@@ -34,13 +34,13 @@ def main():
     parser = argparse.ArgumentParser(description='Chainer example: DCGAN')
     parser.add_argument('--batchsize', '-b', type=int, default=50, # default=50
                         help='Number of images in each mini-batch')
-    parser.add_argument('--epoch', '-e', type=int, default=500, # defalt=500
+    parser.add_argument('--epoch', '-e', type=int, default=10000, # defalt=500
                         help='Number of sweeps over the dataset to train')
     parser.add_argument('--gpu', '-g', type=int, default=0,
                         help='GPU ID (negative value indicates CPU)')
-    parser.add_argument('--dataset', '-i', default='train_all.txt', # defalt=''
+    parser.add_argument('--dataset', '-i', default='train_illya.txt', # defalt=''
                         help='Directory of image files.  Default is cifar-10.')
-    parser.add_argument('--out', '-o', default='result_anime', # defalt='result'
+    parser.add_argument('--out', '-o', default='result_anime_illya4', # defalt='result'
                         help='Directory to output the result')
     parser.add_argument('--resume', '-r', default='',
                         help='Resume the training from snapshot')
@@ -48,7 +48,7 @@ def main():
                         help='Number of hidden units (z)')
     parser.add_argument('--seed', type=int, default=0,
                         help='Random seed of z at visualization stage')
-    parser.add_argument('--snapshot_interval', type=int, default=100, # defalt=1000
+    parser.add_argument('--snapshot_interval', type=int, default=1000, # defalt=1000
                         help='Interval of snapshot')
     parser.add_argument('--display_interval', type=int, default=100,
                         help='Interval of displaying log to console')
@@ -95,7 +95,7 @@ def main():
         # Load the CIFAR10 dataset if args.dataset is not specified
         train, _ = cifar.get_cifar10(withlabel=False, scale=255.)
     else:
-        resized_paths = resize_data(args.dataset, insize+32)
+        resized_paths = resize_data(args.dataset, insize+16)
         train = PreprocessedDataset(resized_paths, crop_size=insize)
     print('{} contains {} image files'.format(args.dataset, train.__len__()))
               
