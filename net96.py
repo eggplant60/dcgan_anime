@@ -21,9 +21,10 @@ def add_noise(h, sigma=0.2):
 
     
 class Generator(chainer.Chain):
-    def __init__(self, n_hidden, wscale=0.02):
+    def __init__(self, n_hidden, wscale=0.02, z_sampling='gaussian'):
         self.n_hidden = n_hidden
         self.wscale = wscale
+        self.z_sampling = z_sampling
 
         super(Generator, self).__init__()
         self.n_hidden = n_hidden
@@ -41,22 +42,27 @@ class Generator(chainer.Chain):
             self.bn3 = L.BatchNormalization(64)
             
     def make_hidden(self, batchsize):
-        return numpy.random.uniform(-1, 1, (batchsize, self.n_hidden, 1, 1))\
-            .astype(numpy.float32)
+        size = (batchsize, self.n_hidden, 1, 1)
+        if self.z_sampling == 'gaussian':
+            #print('aaa')
+            return numpy.random.normal(loc=0.0, scale=1.0, size=size).astype(numpy.float32)
+        else:
+            return numpy.random.uniform(-1, 1, size=size).astype(numpy.float32)
             
     def __call__(self, z):
         h = F.reshape(F.leaky_relu(self.bn0l(self.l0z(z))),
                       (z.data.shape[0], 512, 6, 6))
         #print('G: {}'.format(h.shape))
-        h = F.relu(self.bn1(self.dc1(h)))
-        h = F.relu(self.bn2(self.dc2(h)))
-        h = F.relu(self.bn3(self.dc3(h)))
+        h = F.leaky_relu(self.bn1(self.dc1(h)))
+        h = F.leaky_relu(self.bn2(self.dc2(h)))
+        h = F.leaky_relu(self.bn3(self.dc3(h)))
         # 最終層にはBN入れない
         # https://elix-tech.github.io/ja/2017/02/06/gan.html
         x = F.tanh(self.dc4(h)) # [-1, 1]
         return x
 
-
+    
+# for WGAN-GP
 class MyLayerNormalization(L.LayerNormalization):
     def __init__(self, ch):
         super(MyLayerNormalization, self).__init__()
